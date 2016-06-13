@@ -1,13 +1,11 @@
 /*Maze generation and solving*/
 /* Design and analysis project by Gaurev Chand Katoch and Lalit Rajendra Ahuja*/
-//Planned improvements
-//Make makelist and addlist functions add at beginning
 #include<iostream>
 #include<cstdlib>
 #include<cstdio>
 #include<ctime>
-#define width 40
-#define siz 1600//Square of width
+#define width 10
+#define siz 100//Square of width
 using namespace std;
 class Node
 {
@@ -90,28 +88,32 @@ void showlist(Node *st);
 Node *sorting1(Node *&head);
 int main()
 {
+
   Node *start=NULL;
+
   for(int i=0;i<siz;i++)
-  {
-  	start=makelist(start,i);
-  	if(i%10000==0)
-  		cout<<i<<"Nodes Declared";
-  }
+  start=makelist(start,i);
+
   cout<<"Generating a "<<width<<"X"<<width<<" maze\n";
   start=Prim(start);
+
   start=sorting1(start);
+
   Node *n=start;
   while(n!=NULL)
   {
       n->represent();
       n=n->next;
   }
+
   display(start);
+
   char c;
   cout<<"\nEnter any character to solve:";
-  c=getchar();
-  cout<<"Entering Maze at 0,0\nExit at "<<width<<","<<width<<"\nPath:"<<endl;
+  cin>>c;
+  cout<<"Before Solving:";
 
+  cout<<"Entering Maze at 0,0\nExit at "<<width<<","<<width<<"\nPath:"<<endl;
   solve(start);
 
 }
@@ -128,18 +130,16 @@ int Present(Node *lst,int data)//Checks if the passed data is present in the pas
 }
 Node *makelist(Node *st,int i)//Makes a singly linked list
 {
-    Node *n,*p;
+    Node *n;
     n=new Node(i);
-    p=st;
     if(st==NULL)
       st=n;
      else
    {
-     while(p->next!=NULL)
-      p=p->next;
-     p->next=n;
+     n->next=st;
+     st=n;
    }
-   //cout<<i<<"  ";
+  //cout<<i<<"  ";
     return st;
 }
 void display(Node *start)//Uses special characters to represent the maze graphically
@@ -160,7 +160,7 @@ void display(Node *start)//Uses special characters to represent the maze graphic
 Node *srch(Node *&st,int i)//Looks for the passed data in the list and returns extracts that node from the list
 {
    if(!Present(st,i))
-        return NULL;
+      return NULL;
     Node *p,*q;
     p=st;
     while(p->cellno!=i)
@@ -184,12 +184,13 @@ int getcell(Node *st,int n)//Returns the data at position 'n' in the list
 }
 Node *Prim(Node *st)//Runs Prim's algorithm to generate the maze
 {
+    time_t tim;
     Node *graph,*neighbours=NULL,*gr;
     srand(time(0));
     int n,i=0,s=0;
     n=rand()%siz;
     graph=srch(st,n);//Random starting point
-    cout<<"Starting point of maze generation is:"<<graph->j<<","<<graph->k<<endl;
+    cout<<"\nStarting point of maze generation is:"<<graph->j<<","<<graph->k<<endl;
     neighbours=getneighbours(n,st,s,graph,neighbours);//Getting a list of the selected node's neighbours
     //cout<<"size "<<s<<endl;
    // showlist(neighbours);
@@ -212,7 +213,11 @@ Node *Prim(Node *st)//Runs Prim's algorithm to generate the maze
       //cout<<"Graph:";
       //cout<<endl<<"Showlist"<<endl;
       //showlist(graph);//working
-      //cout<<endl<<"//////"<<i<<"??????????"<<endl;
+      if(i%100000==0)
+      {
+          time(&tim);
+          cout<<i<<" completed, time: "<<ctime(&tim)<<endl;
+      }
     }while(neighbours!=NULL);
     //cout<<"No of iterations of do-while loop"<<i;
     //cout<<graph->cellno;
@@ -344,17 +349,19 @@ Node *addlist(Node *lst,Node *nod)//Adds a node to the singly linked list
 {
     Node *n;
     n=lst;
-    if(n!=NULL)
+    if(lst!=NULL)
     {
-        while(n->next!=NULL)
-          n=n->next;
-         n->next=nod;
+        nod->next=lst;
+        lst=nod;
+        //while(n->next!=NULL)
+          //n=n->next;
+         //n->next=nod;
     }
     else
     {
-      n=nod;
-      n->next=NULL;
-      lst=n;
+      lst=nod;
+      nod->next=NULL;
+
     }
     return lst;
 }
@@ -409,8 +416,11 @@ Node *getneighbours(int n,Node *&st,int &s,Node *gr,Node *nbrs)//Gets the adjace
 }
 void solve(Node *start)//Traverses the maze using dfs and finds a path to escape
 {
-    //cout<<"\nto node"<<start->j<<","<<start->k;
+    //char c;
+    cout<<"\nto node"<<start->j<<","<<start->k;
     start->visit=1;
+    //cout<<"Enter char:";
+    //cin>>c;
     if(start->cellno==siz-1)
     {
        cout<<"\n****Escaped the maze!!****";
@@ -449,7 +459,7 @@ void solve(Node *start)//Traverses the maze using dfs and finds a path to escape
       //if(nr[x]->visit==0)
        solve(nr[x]);
     }
-    //cout<<"\nReturning from "<<start->j<<","<<start->k<<"\n";
+    cout<<"\nReturning from "<<start->j<<","<<start->k<<"\n";
     return;
 }
 Node *sorting1(Node *&head)//Sorts a singly linked list
